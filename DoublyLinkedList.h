@@ -63,20 +63,37 @@ public:
     ~DoublyLinkedList();
 
     /**
-     * @brief 禁止拷贝构造函数
+     * @brief 深拷贝构造函数
+     * @param other 源链表
      * 
-     * 禁止链表的拷贝构造，防止浅拷贝导致的双重释放问题。
-     * 如果需要拷贝，应该实现深拷贝。
+     * 创建一个新的链表，深拷贝源链表的所有节点。
+     * 新链表拥有独立的内存，修改新链表不会影响源链表。
+     * 
+     * 实现细节：
+     * 1. 初始化空链表
+     * 2. 遍历源链表的每个节点
+     * 3. 对每个节点的数据进行拷贝，创建新节点
+     * 4. 将新节点添加到新链表的尾部
+     * 5. 保持新链表的节点顺序与源链表一致
      */
-    DoublyLinkedList(const DoublyLinkedList&) = delete;
+    DoublyLinkedList(const DoublyLinkedList& other);
 
     /**
-     * @brief 禁止拷贝赋值运算符
+     * @brief 深拷贝赋值运算符
+     * @param other 源链表
+     * @return 引用指向当前链表
      * 
-     * 禁止链表的拷贝赋值，防止浅拷贝导致的双重释放问题。
-     * 如果需要拷贝赋值，应该实现深拷贝。
+     * 将源链表的所有节点深拷贝到当前链表。
+     * 当前链表的原有节点被释放，然后创建新的独立节点。
+     * 
+     * 实现细节（使用 copy-and-swap 惯用法）：
+     * 1. 检查自赋值
+     * 2. 释放当前链表的所有节点
+     * 3. 遍历源链表，深拷贝每个节点
+     * 4. 保持节点顺序一致
+     * 5. 返回当前对象的引用
      */
-    DoublyLinkedList& operator=(const DoublyLinkedList&) = delete;
+    DoublyLinkedList& operator=(const DoublyLinkedList& other);
 
     /**
      * @brief 移动构造函数
@@ -156,36 +173,43 @@ public:
     void remove(int index);
 
     /**
-     * @brief 获取头部元素（不删除）
-     * @return 头部元素的值
+     * @brief 获取头部元素的 const 引用（不删除）
+     * @return 头部元素的 const 引用
      * @throw std::runtime_error 如果链表为空
      * 
-     * 返回链表头节点的数据，但不删除该节点。
+     * 返回链表头节点数据的 const 引用，但不删除该节点。
+     * 使用 const 引用避免了数据拷贝，提高性能。
+     * 通过返回 const 引用，确保调用者不能修改链表中的数据。
      */
-    T getFront() const;
+    const T& getFront() const;
 
     /**
-     * @brief 获取尾部元素（不删除）
-     * @return 尾部元素的值
+     * @brief 获取尾部元素的 const 引用（不删除）
+     * @return 尾部元素的 const 引用
      * @throw std::runtime_error 如果链表为空
      * 
-     * 返回链表尾节点的数据，但不删除该节点。
+     * 返回链表尾节点数据的 const 引用，但不删除该节点。
+     * 使用 const 引用避免了数据拷贝，提高性能。
+     * 通过返回 const 引用，确保调用者不能修改链表中的数据。
      */
-    T getBack() const;
+    const T& getBack() const;
 
     /**
-     * @brief 获取指定位置的元素（不删除）
+     * @brief 获取指定位置元素的 const 引用（不删除）
      * @param index 元素的索引（从0开始）
-     * @return 指定位置元素的值
+     * @return 指定位置元素的 const 引用
      * @throw std::out_of_range 如果索引超出范围（index < 0 或 index >= size）
      * 
-     * 返回指定索引位置节点的数据，但不删除该节点。
+     * 返回指定索引位置节点数据的 const 引用，但不删除该节点。
+     * 使用 const 引用避免了数据拷贝，提高性能。
+     * 通过返回 const 引用，确保调用者不能修改链表中的数据。
+     * 
      * 优化：根据索引位置选择从头部或尾部开始遍历：
      * - 如果 index <= size/2，从头部开始遍历
      * - 如果 index > size/2，从尾部开始遍历
      * 这样平均时间复杂度仍然是 O(n)，但在最坏情况下减少一半的遍历步数。
      */
-    T get(int index) const;
+    const T& get(int index) const;
 
     /**
      * @brief 获取链表大小

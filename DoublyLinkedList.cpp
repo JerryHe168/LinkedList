@@ -32,6 +32,88 @@ DoublyLinkedList<T>::~DoublyLinkedList() {
 }
 
 /**
+ * @brief 深拷贝构造函数实现
+ * @tparam T 链表中存储的数据类型
+ * @param other 源链表（const 引用）
+ * 
+ * 实现细节：
+ * 1. 初始化空链表（head=nullptr, tail=nullptr, size=0）
+ * 2. 检查源链表是否为空，如果为空直接返回
+ * 3. 遍历源链表的每个节点：
+ *    - 从源链表的头节点开始
+ *    - 对每个节点的数据进行拷贝，创建新节点
+ *    - 使用 pushBack 将新节点添加到新链表的尾部
+ * 4. 保持新链表的节点顺序与源链表完全一致
+ * 
+ * 深拷贝的特点：
+ * - 新链表拥有独立的内存空间
+ * - 修改新链表不会影响源链表
+ * - 销毁新链表不会影响源链表
+ * - 时间复杂度：O(n)
+ * - 空间复杂度：O(n)
+ */
+template <typename T>
+DoublyLinkedList<T>::DoublyLinkedList(const DoublyLinkedList& other)
+    : head(nullptr), tail(nullptr), size(0) {
+    if (other.isEmpty()) {
+        return;
+    }
+
+    Node* current = other.head;
+    while (current != nullptr) {
+        pushBack(current->data);
+        current = current->next;
+    }
+}
+
+/**
+ * @brief 深拷贝赋值运算符实现
+ * @tparam T 链表中存储的数据类型
+ * @param other 源链表（const 引用）
+ * @return 引用指向当前链表
+ * 
+ * 实现细节：
+ * 1. 检查自赋值（防止自己赋值给自己）
+ * 2. 如果不是自赋值：
+ *    - 释放当前链表的所有节点（调用 clear()）
+ *    - 检查源链表是否为空，如果为空直接返回
+ *    - 遍历源链表的每个节点：
+ *      - 从源链表的头节点开始
+ *      - 对每个节点的数据进行拷贝，创建新节点
+ *      - 使用 pushBack 将新节点添加到当前链表的尾部
+ * 3. 保持节点顺序与源链表完全一致
+ * 4. 返回当前对象的引用
+ * 
+ * 深拷贝赋值的特点：
+ * - 当前链表拥有独立的内存空间
+ * - 修改当前链表不会影响源链表
+ * - 时间复杂度：O(n + m)，其中 n 是当前链表大小，m 是源链表大小
+ * - 空间复杂度：O(m)
+ * 
+ * @note 也可以使用 copy-and-swap 惯用法来实现，提供更强的异常安全性
+ */
+template <typename T>
+DoublyLinkedList<T>& DoublyLinkedList<T>::operator=(const DoublyLinkedList& other) {
+    if (this == &other) {
+        return *this;
+    }
+
+    clear();
+
+    if (other.isEmpty()) {
+        return *this;
+    }
+
+    Node* current = other.head;
+    while (current != nullptr) {
+        pushBack(current->data);
+        current = current->next;
+    }
+
+    return *this;
+}
+
+/**
  * @brief 移动构造函数实现
  * @tparam T 链表中存储的数据类型
  * @param other 源链表（右值引用）
@@ -304,17 +386,22 @@ void DoublyLinkedList<T>::remove(int index) {
 }
 
 /**
- * @brief 获取头部元素的实现
+ * @brief 获取头部元素的实现（返回 const 引用）
  * @tparam T 链表中存储的数据类型
- * @return 头部元素的值
+ * @return 头部元素的 const 引用
  * @throw std::runtime_error 如果链表为空
  * 
  * 实现细节：
  * 1. 检查链表是否为空
- * 2. 返回头节点的数据值
+ * 2. 返回头节点数据的 const 引用
+ * 
+ * 性能优化：
+ * - 返回 const 引用避免了数据拷贝
+ * - 对于大型对象，性能提升显著
+ * - 时间复杂度：O(1)
  */
 template <typename T>
-T DoublyLinkedList<T>::getFront() const {
+const T& DoublyLinkedList<T>::getFront() const {
     if (isEmpty()) {
         throw std::runtime_error("List is empty");
     }
@@ -322,17 +409,22 @@ T DoublyLinkedList<T>::getFront() const {
 }
 
 /**
- * @brief 获取尾部元素的实现
+ * @brief 获取尾部元素的实现（返回 const 引用）
  * @tparam T 链表中存储的数据类型
- * @return 尾部元素的值
+ * @return 尾部元素的 const 引用
  * @throw std::runtime_error 如果链表为空
  * 
  * 实现细节：
  * 1. 检查链表是否为空
- * 2. 返回尾节点的数据值
+ * 2. 返回尾节点数据的 const 引用
+ * 
+ * 性能优化：
+ * - 返回 const 引用避免了数据拷贝
+ * - 对于大型对象，性能提升显著
+ * - 时间复杂度：O(1)
  */
 template <typename T>
-T DoublyLinkedList<T>::getBack() const {
+const T& DoublyLinkedList<T>::getBack() const {
     if (isEmpty()) {
         throw std::runtime_error("List is empty");
     }
@@ -340,10 +432,10 @@ T DoublyLinkedList<T>::getBack() const {
 }
 
 /**
- * @brief 获取指定位置元素的实现（优化版）
+ * @brief 获取指定位置元素的实现（优化版，返回 const 引用）
  * @tparam T 链表中存储的数据类型
  * @param index 元素的索引（从0开始）
- * @return 指定位置元素的值
+ * @return 指定位置元素的 const 引用
  * @throw std::out_of_range 如果索引超出范围
  * 
  * 实现细节（优化版）：
@@ -351,15 +443,16 @@ T DoublyLinkedList<T>::getBack() const {
  * 2. 判断索引位置：
  *    - 如果 index <= size / 2：从头部开始正向遍历
  *    - 如果 index > size / 2：从尾部开始反向遍历
- * 3. 返回目标节点的数据值
+ * 3. 返回目标节点数据的 const 引用
  * 
  * 性能优化：
  * - 最坏情况下遍历步数从 n 减少到 n/2
  * - 平均时间复杂度仍然是 O(n)，但实际执行效率提升约 50%
- * - 特别适合访问靠近尾部的元素
+ * - 返回 const 引用避免了数据拷贝
+ * - 特别适合访问靠近尾部的元素和大型对象
  */
 template <typename T>
-T DoublyLinkedList<T>::get(int index) const {
+const T& DoublyLinkedList<T>::get(int index) const {
     if (index < 0 || index >= size) {
         throw std::out_of_range("Index out of range");
     }
