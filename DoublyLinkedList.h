@@ -11,6 +11,8 @@
 #ifndef DOUBLY_LINKED_LIST_H
 #define DOUBLY_LINKED_LIST_H
 
+#include <utility>
+
 /**
  * @class DoublyLinkedList
  * @brief 双向链表模板类
@@ -34,12 +36,21 @@ private:
         Node* next;   ///< 指向后一个节点的指针
         
         /**
-         * @brief 节点构造函数
+         * @brief 节点构造函数（拷贝构造）
          * @param value 要存储在节点中的数据值
          * 
-         * 创建一个新节点，初始化数据，并将前后指针置空。
+         * 创建一个新节点，通过拷贝初始化数据，并将前后指针置空。
          */
         Node(const T& value) : data(value), prev(nullptr), next(nullptr) {}
+        
+        /**
+         * @brief 节点构造函数（移动构造）
+         * @param value 要存储在节点中的数据值（右值引用）
+         * 
+         * 创建一个新节点，通过移动初始化数据，并将前后指针置空。
+         * 对于大型对象，移动语义可以避免不必要的拷贝，提高性能。
+         */
+        Node(T&& value) : data(std::move(value)), prev(nullptr), next(nullptr) {}
     };
 
     Node* head;   ///< 指向链表头节点的指针
@@ -112,25 +123,45 @@ public:
     DoublyLinkedList& operator=(DoublyLinkedList&& other) noexcept;
 
     /**
-     * @brief 在链表头部插入元素
+     * @brief 在链表头部插入元素（拷贝版本）
      * @param value 要插入的元素值
      * 
      * 在链表的开头添加一个新节点，新节点成为新的头节点。
      * 如果链表为空，新节点同时也是尾节点。
      */
     void pushFront(const T& value);
+    
+    /**
+     * @brief 在链表头部插入元素（移动版本）
+     * @param value 要插入的元素值（右值引用）
+     * 
+     * 在链表的开头添加一个新节点，新节点成为新的头节点。
+     * 使用移动语义避免不必要的拷贝，对于大型对象性能更优。
+     * 如果链表为空，新节点同时也是尾节点。
+     */
+    void pushFront(T&& value);
 
     /**
-     * @brief 在链表尾部插入元素
+     * @brief 在链表尾部插入元素（拷贝版本）
      * @param value 要插入的元素值
      * 
      * 在链表的末尾添加一个新节点，新节点成为新的尾节点。
      * 如果链表为空，新节点同时也是头节点。
      */
     void pushBack(const T& value);
+    
+    /**
+     * @brief 在链表尾部插入元素（移动版本）
+     * @param value 要插入的元素值（右值引用）
+     * 
+     * 在链表的末尾添加一个新节点，新节点成为新的尾节点。
+     * 使用移动语义避免不必要的拷贝，对于大型对象性能更优。
+     * 如果链表为空，新节点同时也是头节点。
+     */
+    void pushBack(T&& value);
 
     /**
-     * @brief 在指定位置插入元素（优化版）
+     * @brief 在指定位置插入元素（优化版，拷贝版本）
      * @param index 插入位置的索引（从0开始）
      * @param value 要插入的元素值
      * @throw std::out_of_range 如果索引超出范围（index < 0 或 index > size）
@@ -147,6 +178,26 @@ public:
      * - 平均时间复杂度仍然是 O(n)，但实际执行效率提升约 50%
      */
     void insert(int index, const T& value);
+    
+    /**
+     * @brief 在指定位置插入元素（优化版，移动版本）
+     * @param index 插入位置的索引（从0开始）
+     * @param value 要插入的元素值（右值引用）
+     * @throw std::out_of_range 如果索引超出范围（index < 0 或 index > size）
+     * 
+     * 在指定索引位置插入新元素，原位置及后面的元素向后移动。
+     * 使用移动语义避免不必要的拷贝，对于大型对象性能更优。
+     * 如果 index 为 0，等价于 pushFront。
+     * 如果 index 为 size，等价于 pushBack。
+     * 
+     * 性能优化：
+     * - 根据索引位置选择从头部或尾部开始遍历
+     * - 如果 index <= size/2，从头部正向遍历
+     * - 如果 index > size/2，从尾部反向遍历
+     * - 最坏情况下遍历步数从 n 减少到 n/2
+     * - 平均时间复杂度仍然是 O(n)，但实际执行效率提升约 50%
+     */
+    void insert(int index, T&& value);
 
     /**
      * @brief 删除并返回头部元素

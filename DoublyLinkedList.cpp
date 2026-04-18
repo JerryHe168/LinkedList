@@ -165,7 +165,7 @@ DoublyLinkedList<T>& DoublyLinkedList<T>::operator=(DoublyLinkedList&& other) no
 }
 
 /**
- * @brief 在链表头部插入元素的实现
+ * @brief 在链表头部插入元素的实现（拷贝版本）
  * @tparam T 链表中存储的数据类型
  * @param value 要插入的元素值
  * 
@@ -192,7 +192,39 @@ void DoublyLinkedList<T>::pushFront(const T& value) {
 }
 
 /**
- * @brief 在链表尾部插入元素的实现
+ * @brief 在链表头部插入元素的实现（移动版本）
+ * @tparam T 链表中存储的数据类型
+ * @param value 要插入的元素值（右值引用）
+ * 
+ * 实现细节：
+ * 1. 创建新节点，通过移动语义存储传入的值
+ * 2. 如果链表为空，新节点同时作为头节点和尾节点
+ * 3. 如果链表非空：
+ *    - 新节点的 next 指向当前头节点
+ *    - 当前头节点的 prev 指向新节点
+ *    - 更新头指针指向新节点
+ * 4. 链表大小加1
+ * 
+ * 性能优化：
+ * - 使用移动语义避免不必要的数据拷贝
+ * - 对于大型对象，性能提升显著
+ * - 时间复杂度：O(1)
+ */
+template <typename T>
+void DoublyLinkedList<T>::pushFront(T&& value) {
+    Node* newNode = new Node(std::move(value));
+    if (isEmpty()) {
+        head = tail = newNode;
+    } else {
+        newNode->next = head;
+        head->prev = newNode;
+        head = newNode;
+    }
+    size++;
+}
+
+/**
+ * @brief 在链表尾部插入元素的实现（拷贝版本）
  * @tparam T 链表中存储的数据类型
  * @param value 要插入的元素值
  * 
@@ -219,7 +251,39 @@ void DoublyLinkedList<T>::pushBack(const T& value) {
 }
 
 /**
- * @brief 在指定位置插入元素的实现（优化版）
+ * @brief 在链表尾部插入元素的实现（移动版本）
+ * @tparam T 链表中存储的数据类型
+ * @param value 要插入的元素值（右值引用）
+ * 
+ * 实现细节：
+ * 1. 创建新节点，通过移动语义存储传入的值
+ * 2. 如果链表为空，新节点同时作为头节点和尾节点
+ * 3. 如果链表非空：
+ *    - 新节点的 prev 指向当前尾节点
+ *    - 当前尾节点的 next 指向新节点
+ *    - 更新尾指针指向新节点
+ * 4. 链表大小加1
+ * 
+ * 性能优化：
+ * - 使用移动语义避免不必要的数据拷贝
+ * - 对于大型对象，性能提升显著
+ * - 时间复杂度：O(1)
+ */
+template <typename T>
+void DoublyLinkedList<T>::pushBack(T&& value) {
+    Node* newNode = new Node(std::move(value));
+    if (isEmpty()) {
+        head = tail = newNode;
+    } else {
+        newNode->prev = tail;
+        tail->next = newNode;
+        tail = newNode;
+    }
+    size++;
+}
+
+/**
+ * @brief 在指定位置插入元素的实现（优化版，拷贝版本）
  * @tparam T 链表中存储的数据类型
  * @param index 插入位置的索引（从0开始）
  * @param value 要插入的元素值
@@ -273,6 +337,70 @@ void DoublyLinkedList<T>::insert(int index, const T& value) {
     }
 
     Node* newNode = new Node(value);
+    newNode->prev = current->prev;
+    newNode->next = current;
+    current->prev->next = newNode;
+    current->prev = newNode;
+    size++;
+}
+
+/**
+ * @brief 在指定位置插入元素的实现（优化版，移动版本）
+ * @tparam T 链表中存储的数据类型
+ * @param index 插入位置的索引（从0开始）
+ * @param value 要插入的元素值（右值引用）
+ * @throw std::out_of_range 如果索引超出范围
+ * 
+ * 实现细节（优化版）：
+ * 1. 检查索引是否有效（0 <= index <= size）
+ * 2. 如果 index 为 0，调用 pushFront 优化
+ * 3. 如果 index 为 size，调用 pushBack 优化
+ * 4. 一般情况：
+ *    - 判断索引位置选择遍历方向：
+ *      - 如果 index <= size / 2：从头部正向遍历
+ *      - 如果 index > size / 2：从尾部反向遍历
+ *    - 通过移动语义创建新节点
+ *    - 调整新节点和相邻节点的指针
+ *    - 链表大小加1
+ * 
+ * 性能优化：
+ * - 最坏情况下遍历步数从 n 减少到 n/2
+ * - 平均时间复杂度仍然是 O(n)，但实际执行效率提升约 50%
+ * - 使用移动语义避免不必要的数据拷贝
+ * - 对于大型对象，性能提升显著
+ * - 特别适合访问靠近尾部的元素
+ */
+template <typename T>
+void DoublyLinkedList<T>::insert(int index, T&& value) {
+    if (index < 0 || index > size) {
+        throw std::out_of_range("Index out of range");
+    }
+
+    if (index == 0) {
+        pushFront(std::move(value));
+        return;
+    }
+
+    if (index == size) {
+        pushBack(std::move(value));
+        return;
+    }
+
+    Node* current;
+    
+    if (index <= size / 2) {
+        current = head;
+        for (int i = 0; i < index; i++) {
+            current = current->next;
+        }
+    } else {
+        current = tail;
+        for (int i = size - 1; i > index; i--) {
+            current = current->prev;
+        }
+    }
+
+    Node* newNode = new Node(std::move(value));
     newNode->prev = current->prev;
     newNode->next = current;
     current->prev->next = newNode;
