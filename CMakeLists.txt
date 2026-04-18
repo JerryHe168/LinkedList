@@ -4,6 +4,10 @@ project(DoublyLinkedList)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+if(MSVC)
+    add_compile_options(/utf-8)
+endif()
+
 add_executable(DoublyLinkedList main.cpp)
 
 target_include_directories(DoublyLinkedList PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
