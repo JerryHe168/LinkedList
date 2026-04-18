@@ -1,4 +1,4 @@
-/**
+﻿﻿/**
  * @file DoublyLinkedList.cpp
  * @brief 双向链表模板类的实现文件
  * @author Solo Coder
@@ -586,4 +586,113 @@ void DoublyLinkedList<T>::printReverse() const {
         current = current->prev;
     }
     std::cout << std::endl;
+}
+
+/**
+ * @brief 在迭代器位置插入元素的实现
+ * @tparam T 链表中存储的数据类型
+ * @param pos 插入位置的迭代器
+ * @param value 要插入的元素值
+ * @return 指向新插入元素的迭代器
+ * 
+ * 实现细节：
+ * 1. 如果 pos 是 end()（nullptr）：
+ *    - 调用 pushBack 将元素添加到尾部
+ *    - 返回指向新尾节点的迭代器
+ * 2. 如果 pos 是 begin()：
+ *    - 调用 pushFront 将元素添加到头部
+ *    - 返回指向新头节点的迭代器
+ * 3. 一般情况：
+ *    - 获取迭代器指向的节点
+ *    - 创建新节点存储 value
+ *    - 新节点插入在 pos 指向的节点之前
+ *    - 调整相邻节点的指针
+ * 4. 链表大小加1
+ * 5. 返回指向新插入元素的迭代器
+ * 
+ * 时间复杂度：O(1)
+ * 
+ * @note 新元素将位于 pos 指向的元素之前
+ *       例如：链表是 [A, B, C]，在指向 B 的迭代器位置插入 X
+ *             结果是 [A, X, B, C]
+ */
+template <typename T>
+typename DoublyLinkedList<T>::iterator DoublyLinkedList<T>::insert(iterator pos, const T& value) {
+    if (pos == end()) {
+        pushBack(value);
+        return iterator(tail);
+    }
+
+    if (pos == begin()) {
+        pushFront(value);
+        return iterator(head);
+    }
+
+    Node* current = pos.current;
+    Node* newNode = new Node(value);
+    
+    newNode->prev = current->prev;
+    newNode->next = current;
+    current->prev->next = newNode;
+    current->prev = newNode;
+    
+    size++;
+    return iterator(newNode);
+}
+
+/**
+ * @brief 删除迭代器指向元素的实现
+ * @tparam T 链表中存储的数据类型
+ * @param pos 要删除元素的迭代器
+ * @return 指向被删除元素之后的迭代器
+ * @throw std::runtime_error 如果 pos 是 end()（无效位置）
+ * 
+ * 实现细节：
+ * 1. 检查 pos 是否为 end()（nullptr）：
+ *    - 如果是，抛出 std::runtime_error 异常
+ *    - 不能删除 end() 指向的位置（这是一个无效位置）
+ * 2. 如果 pos 是 begin()：
+ *    - 调用 popFront 删除头节点
+ *    - 返回指向新头节点的迭代器（begin()）
+ * 3. 如果 pos 指向尾节点：
+ *    - 调用 popBack 删除尾节点
+ *    - 返回指向末尾的迭代器（end()）
+ * 4. 一般情况：
+ *    - 获取迭代器指向的节点
+ *    - 保存下一个节点的指针
+ *    - 调整相邻节点的指针，跳过目标节点
+ *    - 释放目标节点内存
+ * 5. 链表大小减1
+ * 6. 返回指向被删除节点之后的迭代器
+ * 
+ * 时间复杂度：O(1)
+ * 
+ * @note 原迭代器在删除后失效，不应再使用
+ * @warning 不能删除 end() 迭代器指向的位置
+ */
+template <typename T>
+typename DoublyLinkedList<T>::iterator DoublyLinkedList<T>::erase(iterator pos) {
+    if (pos == end()) {
+        throw std::runtime_error("Cannot erase end() iterator");
+    }
+
+    if (pos == begin()) {
+        popFront();
+        return begin();
+    }
+
+    if (pos.current == tail) {
+        popBack();
+        return end();
+    }
+
+    Node* current = pos.current;
+    Node* nextNode = current->next;
+    
+    current->prev->next = current->next;
+    current->next->prev = current->prev;
+    delete current;
+    
+    size--;
+    return iterator(nextNode);
 }
