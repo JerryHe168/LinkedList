@@ -1,6 +1,37 @@
+/**
+ * @file main.cpp
+ * @brief 双向链表测试程序
+ * @author Solo Coder
+ * @date 2026-04-18
+ * 
+ * 本文件包含了对 DoublyLinkedList 类的全面测试，包括：
+ * - 整数类型链表的功能测试
+ * - 字符串类型链表的功能测试
+ * - 异常处理测试
+ */
+
 #include <iostream>
 #include "DoublyLinkedList.h"
 
+/**
+ * @brief 测试整数类型的双向链表
+ * 
+ * 测试以下功能：
+ * - pushBack: 在尾部插入元素
+ * - pushFront: 在头部插入元素
+ * - insert: 在指定位置插入元素
+ * - getFront: 获取头部元素
+ * - getBack: 获取尾部元素
+ * - get: 获取指定位置元素
+ * - popFront: 删除并返回头部元素
+ * - popBack: 删除并返回尾部元素
+ * - remove: 删除指定位置元素
+ * - clear: 清空链表
+ * - isEmpty: 检查链表是否为空
+ * - getSize: 获取链表大小
+ * - print: 正向打印链表
+ * - printReverse: 反向打印链表
+ */
 void testIntList() {
     std::cout << "=== Testing Integer Doubly Linked List ===" << std::endl;
     
@@ -48,6 +79,18 @@ void testIntList() {
     list.print();
 }
 
+/**
+ * @brief 测试字符串类型的双向链表
+ * 
+ * 验证模板类对不同数据类型的支持，测试以下功能：
+ * - pushBack: 在尾部插入字符串
+ * - pushFront: 在头部插入字符串
+ * - insert: 在指定位置插入字符串
+ * - getFront: 获取头部字符串
+ * - getBack: 获取尾部字符串
+ * - popFront: 删除并返回头部字符串
+ * - print: 正向打印字符串链表
+ */
 void testStringList() {
     std::cout << "\n=== Testing String Doubly Linked List ===" << std::endl;
     
@@ -68,6 +111,18 @@ void testStringList() {
     list.print();
 }
 
+/**
+ * @brief 测试异常处理机制
+ * 
+ * 测试以下异常情况：
+ * - 空链表执行 popFront: 应抛出 std::runtime_error
+ * - 空链表执行 getFront: 应抛出 std::runtime_error
+ * - 索引越界访问 get: 应抛出 std::out_of_range
+ * - 索引越界插入 insert: 应抛出 std::out_of_range
+ * - 索引越界删除 remove: 应抛出 std::out_of_range
+ * 
+ * 所有异常都应被正确捕获，验证异常消息的正确性。
+ */
 void testExceptionHandling() {
     std::cout << "\n=== Testing Exception Handling ===" << std::endl;
     
@@ -107,6 +162,17 @@ void testExceptionHandling() {
     std::cout << "All exception tests passed!" << std::endl;
 }
 
+/**
+ * @brief 主函数
+ * @return 程序退出码，0 表示成功
+ * 
+ * 依次执行所有测试函数：
+ * 1. testIntList: 测试整数类型链表
+ * 2. testStringList: 测试字符串类型链表
+ * 3. testExceptionHandling: 测试异常处理
+ * 
+ * 如果所有测试通过，输出成功信息。
+ */
 int main() {
     testIntList();
     testStringList();
