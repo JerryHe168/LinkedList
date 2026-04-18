@@ -63,6 +63,38 @@ public:
     ~DoublyLinkedList();
 
     /**
+     * @brief 禁止拷贝构造函数
+     * 
+     * 禁止链表的拷贝构造，防止浅拷贝导致的双重释放问题。
+     * 如果需要拷贝，应该实现深拷贝。
+     */
+    DoublyLinkedList(const DoublyLinkedList&) = delete;
+
+    /**
+     * @brief 禁止拷贝赋值运算符
+     * 
+     * 禁止链表的拷贝赋值，防止浅拷贝导致的双重释放问题。
+     * 如果需要拷贝赋值，应该实现深拷贝。
+     */
+    DoublyLinkedList& operator=(const DoublyLinkedList&) = delete;
+
+    /**
+     * @brief 移动构造函数
+     * 
+     * 支持链表的移动构造，将源链表的所有权转移到新链表。
+     * 源链表变为空链表。
+     */
+    DoublyLinkedList(DoublyLinkedList&& other) noexcept;
+
+    /**
+     * @brief 移动赋值运算符
+     * 
+     * 支持链表的移动赋值，将源链表的所有权转移到当前链表。
+     * 当前链表的原有节点被释放，源链表变为空链表。
+     */
+    DoublyLinkedList& operator=(DoublyLinkedList&& other) noexcept;
+
+    /**
      * @brief 在链表头部插入元素
      * @param value 要插入的元素值
      * 
@@ -148,7 +180,10 @@ public:
      * @throw std::out_of_range 如果索引超出范围（index < 0 或 index >= size）
      * 
      * 返回指定索引位置节点的数据，但不删除该节点。
-     * 从头部开始遍历找到指定位置的节点。
+     * 优化：根据索引位置选择从头部或尾部开始遍历：
+     * - 如果 index <= size/2，从头部开始遍历
+     * - 如果 index > size/2，从尾部开始遍历
+     * 这样平均时间复杂度仍然是 O(n)，但在最坏情况下减少一半的遍历步数。
      */
     T get(int index) const;
 
@@ -173,6 +208,9 @@ public:
      * 
      * 删除链表中的所有元素，释放所有节点占用的内存。
      * 执行后链表变为空，大小为0。
+     * 
+     * 优化：直接遍历释放所有节点，而不是循环调用 popFront。
+     * 这样只需一次遍历，效率更高。
      */
     void clear();
 
